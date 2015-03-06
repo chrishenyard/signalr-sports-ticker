@@ -1,0 +1,120 @@
+﻿html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, font, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+}
+		
+body {
+	font: 13px/1.385 helvetica,arial,clean,sans-serif;		
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak, .ng-hide {
+    display: none !important;
+}
+
+.splash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height:100%;
+    width:100%;	
+    filter: alpha(opacity=60);
+    opacity: 0.6;
+    background: #000;
+}
+		
+.wrapper {
+	margin: 0 auto;
+}
+		
+.content {
+	min-height: 400px;
+	min-width: 260px;
+	margin-top: 10px;
+			
+			
+	border-style: solid;
+	border-width: 1px;		
+}
+		
+.row-header {
+	width: 50%;
+}
+		
+.opponents {
+	width: 100%;
+}
+		
+td {
+	padding: 5px;
+	vertical-align: middle;
+}
+		
+.opponents tr {
+	border-bottom: 1px solid #dfdfdf;		
+}
+		
+.game-summary {
+	background: #3f3f3f;
+	color: #fff;
+}
+		
+.game-summary-timeout {
+	background: gold;
+	color: #fff;
+}
+
+.header {
+	font-weight: 700;
+}
+		
+.team {
+	height: 50px;
+}
+		
+.team-name {
+	font-weight: 700;
+}
+		
+.stats {
+	width: 100%;
+}
+		
+.record {
+	font-size: 9px;
+}
+		
+.stats-points {
+	font-weight: 700;
+}
+		
+.total-points {
+	font-weight: 700;
+}
+
+@-webkit-keyframes highlight {   
+	0% {background: darkgrey; color: white; }
+	100% {background: none;}
+}
+
+@keyframes highlight {
+	0% {background: darkgrey; color: white; }
+	100% {background: none;}
+}
+
+.highlight {
+	-webkit-animation: highlight 1.5s;
+	animation: highlight 1.5s;
+}

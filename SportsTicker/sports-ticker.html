@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sports Ticker</title>
+    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/ticker.css" rel="stylesheet">
+</head>
+<body ng-app="sportsTickerApp" ng-controller="sportsTickerCtrl as ticker">
+    <div class="splash" ng-cloak ng-hide="ticker.initialized"></div>
+    <div class="wrapper" ng-cloak ng-hide="!ticker.initialized">
+        <div class="container">
+            <div class="row">
+                <!-- game -->
+                <div class="col-md-6" ng-repeat="game in ticker.games">
+                    <div class="content">
+                        <!-- game header -->
+                        <div>
+                            <table class="opponents">
+                                <tr ng-class="{ 'game-summary-timeout' : ticker.gameClock.Timeout, 'game-summary' : !ticker.gameClock.Timeout }">
+                                    <td style="width: 10%;" colspan="2" class="row-header">{{ticker.gameClock.Timeout ? 'Timeout' : ticker.gameClock.FinalBuzzer ? 'Final' : 'Score' }}</td>
+                                    <td>1</td>
+                                    <td>2</td>
+                                    <td>3</td>
+                                    <td>4</td>
+                                    <td>T</td>
+                                </tr>
+                                <!-- team -->
+                                <tr class="team" ng-repeat="opponent in game.Opponents">
+                                    <td><img src="{{::opponent.Team.Logo}}" /></td>
+                                    <td class="row-header">
+                                        <div class="team-name">{{::opponent.Team.Name}}</div>
+                                        <div class="record">({{::opponent.Team.Combined.Wins}}-{{::opponent.Team.Combined.Losses}}, {{::opponent.Team.Away.Wins}}-{{::opponent.Team.Away.Losses}} away)</div>
+                                    </td>
+                                    <td>
+                                        <span high-light="opponent.PointsPerQuarter[0]" opponent="opponent" ng-bind="opponent.PointsPerQuarter[0] > 0 ? opponent.PointsPerQuarter[0] : '' "></span>
+                                    </td>
+                                    <td>
+                                        <span high-light="opponent.PointsPerQuarter[1]" opponent="opponent" ng-bind="opponent.PointsPerQuarter[1] > 0 ? opponent.PointsPerQuarter[1] : '' "></span>
+                                    </td>
+                                    <td>
+                                        <span high-light="opponent.PointsPerQuarter[2]" opponent="opponent" ng-bind="opponent.PointsPerQuarter[2] > 0 ? opponent.PointsPerQuarter[2] : '' "></span>
+                                    </td>
+                                    <td>
+                                        <span high-light="opponent.PointsPerQuarter[3]" opponent="opponent" ng-bind="opponent.PointsPerQuarter[3] > 0 ? opponent.PointsPerQuarter[3] : '' "></span>
+                                    </td>
+                                    <td class="total-points"><span high-light="opponent.TotalPoints" opponent="opponent" ng-bind="opponent.TotalPoints > 0 ? opponent.TotalPoints : '' "></span></td>
+                                </tr>
+                                <!-- end team -->
+                            </table>
+                        </div>
+                        <!-- end game header -->
+                        <!-- game stats -->
+                        <div>
+                            <table class="stats">
+                                <!-- header -->
+                                <tr>
+                                    <td></td>
+                                    <td class="team-name">{{::game.Opponents[0].Team.Name}}</td>
+                                    <td></td>
+                                    <td class="team-name">{{::game.Opponents[1].Team.Name}}</td>
+                                    <td></td>
+                                </tr>
+                                <!-- end header -->
+                                <!-- points -->
+                                <tr>
+                                    <td style="width:15%;">Pts</td>
+                                    <td style="width:35%;">{{game.Opponents[0].Team.HighPoints.LastName}}</td>
+                                    <td style="width:7.5%;" class="stats-points">{{game.Opponents[0].Team.HighPoints.Stats.Points}}</td>
+                                    <td style="width:35%;">{{game.Opponents[1].Team.HighPoints.LastName}}</td>
+                                    <td style="width:7.5%;" class="stats-points">{{game.Opponents[1].Team.HighPoints.Stats.Points}}</td>
+                                </tr>
+                                <!-- end points -->
+                                <!-- rebounds -->
+                                <tr>
+                                    <td>Rebounds</td>
+                                    <td>{{game.Opponents[0].Team.HighRebounds.LastName}}</td>
+                                    <td class="stats-points">{{game.Opponents[0].Team.HighRebounds.Stats.Rebounds}}</td>
+                                    <td>{{game.Opponents[1].Team.HighRebounds.LastName}}</td>
+                                    <td class="stats-points">{{game.Opponents[1].Team.HighRebounds.Stats.Rebounds}}</td>
+                                </tr>
+                                <!-- end rebounds -->
+                                <!-- assists -->
+                                <tr>
+                                    <td>Assists</td>
+                                    <td>{{game.Opponents[0].Team.HighAssists.LastName}}</td>
+                                    <td class="stats-points">{{game.Opponents[0].Team.HighAssists.Stats.Assists}}</td>
+                                    <td>{{game.Opponents[1].Team.HighAssists.LastName}}</td>
+                                    <td class="stats-points">{{game.Opponents[1].Team.HighAssists.Stats.Assists}}</td>
+                                </tr>
+                                <!-- end assists -->
+                            </table>
+                        </div>
+                        <!-- end game stats -->
+                    </div>
+                </div>
+                <!-- end game -->
+            </div>
+        </div>
+    </div>
+
+    <script src="lib/jquery/js/jquery.js"></script>
+    <script src="lib/bootstrap/js/bootstrap.js"></script>
+    <script src="Scripts/jquery.signalR-2.1.2.js"></script>
+    <script src="lib/angular/js/angular.js"></script>
+    <script src="lib/spin.js/js/spin.js"></script>
+    <script src="app/services/sports-ticker.svc.js"></script>
+    <script src="app/sports-ticker.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            var opts = {
+                lines: 13,
+                width: 10,
+                radius: 30,
+                corners: 1,
+                rotate: 0,
+                direction: 1,
+                color: 'white',
+                speed: 1,
+                trail: 60,
+                shadow: false,
+                hwaccel: false,
+                className: 'spinner',
+                zIndex: 2e9,
+                top: '50%',
+                left: '50%'
+            };
+
+            var splash = angular.element('.splash')[0];
+            var spinner = new Spinner(opts).spin();
+            splash.appendChild(spinner.el);
+        });
+
+    </script>
+
+</body>
+</html>
+
