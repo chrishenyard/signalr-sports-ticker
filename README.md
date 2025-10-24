@@ -1,6 +1,6 @@
 # signalr-sports-ticker
 <div>
-  <h1>Sample SignalR ASP .Net Core 10 and React 19.2 real-time sports ticker app</h1>
+  <h1>Sample SignalR ASP.Net Core 10 and React 19.2 real-time sports ticker app</h1>
 </div>
 
 <p>Tested in the latest versions of Chrome and Firefox</p>
