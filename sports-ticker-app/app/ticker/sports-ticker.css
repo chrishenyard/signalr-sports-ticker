@@ -1,0 +1,18 @@
+body {
+	font: 13px/1.385 helvetica,arial,clean,sans-serif;		
+}
+
+@-webkit-keyframes highlight {   
+	0% {background: darkgrey; color: white; }
+	100% {background: none;}
+}
+
+@keyframes highlight {
+	0% {background: darkgrey; color: white; }
+	100% {background: none;}
+}
+
+.highlight {
+	-webkit-animation: highlight 1.5s;
+	animation: highlight 1.5s;
+}

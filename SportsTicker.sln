@@ -1,16 +1,12 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.22609.0
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11010.61
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportsTicker", "SportsTicker\SportsTicker.csproj", "{DEFD4667-5DB8-4E22-9336-16CD34590B2A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SportsTicker", "SportsTicker\SportsTicker.csproj", "{DEFD4667-5DB8-4E22-9336-16CD34590B2A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{3BD1B0A0-3B3E-4DDC-9B44-C65AC0E13DB1}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\packages.config = .nuget\packages.config
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SportsTickerTests", "SportsTickerTests\SportsTickerTests.csproj", "{5D9BBB89-FAC5-4517-93A3-189E03D9DBEB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SportsTickerTests", "SportsTickerTests\SportsTickerTests.csproj", "{5D9BBB89-FAC5-4517-93A3-189E03D9DBEB}"
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,8 +22,15 @@ Global
 		{5D9BBB89-FAC5-4517-93A3-189E03D9DBEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D9BBB89-FAC5-4517-93A3-189E03D9DBEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D9BBB89-FAC5-4517-93A3-189E03D9DBEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AF0FC512-904C-43AC-B83B-9CF5255242A6}
 	EndGlobalSection
 EndGlobal

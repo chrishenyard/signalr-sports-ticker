@@ -1,0 +1,15 @@
+services:
+  sportsticker:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTPS_PORTS=9001
+      - ASPNETCORE_HTTP_PORTS=9000
+    ports:
+      - "9000"
+      - "9001"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ${COMPOSE_PROJECT_DIR}/SportsTicker/Json:/app/Json:rw

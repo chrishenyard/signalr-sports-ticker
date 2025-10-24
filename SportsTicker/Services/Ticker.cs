@@ -1,146 +1,158 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.SignalR;
+using SportsTicker.Entities;
+using SportsTicker.Hubs;
+using SportsTicker.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Threading;
-using SportsTicker.Entities;
-using SportsTicker.Repositories;
-using Microsoft.AspNet.SignalR;
-using Microsoft.Owin.FileSystems;
-using Microsoft.AspNet.SignalR.Hubs;
 using System.Threading.Tasks;
 
-namespace SportsTicker.Services {
+namespace SportsTicker.Services
+{
+    public interface ITicker
+    {
+        Scores GetAllGames();
+        Task Publish();
+        Task Start();
+    }
 
-	public class Ticker {
-		private readonly static Lazy<Ticker> _instance = new Lazy<Ticker>(
-			() => new Ticker(
-				new TickerDAL(
-					new TickerFileRepository(),
-					new PhysicalFileSystem(@".\").Root),
-				GlobalHost.ConnectionManager.GetHubContext<SportsTickerHub>().Clients)
-		);
+    public class Ticker(ITickerDAL tickerDal,
+        IGameManager gameManager,
+        IHubContext<SportsTickerHub> tickerHubContext) : ITicker
+    {
+        private readonly ITickerDAL _tickerDal = tickerDal;
+        private readonly IHubContext<SportsTickerHub> _tickerHubContext = tickerHubContext;
+        private readonly IGameManager _gameManager = gameManager;
+        private readonly Scores _scores = new();
+        private readonly PeriodicTimer _timer;
+        private List<Game> _games = [];
+        private static readonly Random _random = new();
+        private CancellationTokenSource _cts;
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-		private ITickerDAL _tickerDal;
-		private IHubConnectionContext<dynamic> _clients;
-		private Timer _timer;
-		private List<Game> _games;
-		private GameManager _gameManager = new GameManager();
-		private Scores _scores = new Scores();
-		private static Random _random = new Random();
+        public async Task Start()
+        {
+            await _semaphore.WaitAsync();
 
-		private Ticker(ITickerDAL tickerDal, IHubConnectionContext<dynamic> clients) {
-			_tickerDal = tickerDal;
-			_clients = clients;
-		}
+            try
+            {
+                if (_gameManager.GameClock.InProgress) return;
+                _gameManager.GameClock.InProgress = true;
+                _gameManager.GameClock.FinalBuzzer = false;
+                _games = await _tickerDal.GetGamesAsync();
+                _gameManager.GameClock.Clock.Start();
+                _cts = new CancellationTokenSource();
+                _ = RunAsync(_cts.Token);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
 
-		public static Ticker Instance {
-			get {
-				return _instance.Value;
-			}
-		}
+        private async Task RunAsync(CancellationToken cancellationToken)
+        {
+            using PeriodicTimer _timer = new(TimeSpan.FromSeconds(_gameManager.GameClock.TickerInterval));
 
-		public async Task Start() {
-			if (_gameManager.GameClock.InProgress) return; 
-			_gameManager.GameClock.InProgress = true;
-			await _tickerDal.ResetGamesAsync();
-			_games = await _tickerDal.GetGamesAsync();
-			_gameManager.GameClock.Clock.Start();
-			_timer = new Timer(Publish, null, 0, System.Threading.Timeout.Infinite);
-		}
+            do
+            {
+                await Publish();
+            }
+            while (await _timer.WaitForNextTickAsync(cancellationToken));
+        }
 
-		public void Stop() {
-			_timer.Dispose();
-		}
+        public Scores GetAllGames()
+        {
+            return new Scores { Games = _games, GameClock = _gameManager.GameClock };
+        }
 
-		public async Task<Scores> GetAllGames() {
-			var games = await _tickerDal.GetGamesAsync();
-			return new Scores { Games = games, GameClock = _gameManager.GameClock };
-		}
+        public async Task Publish()
+        {
+            _gameManager.Period.ElapsedTime();
 
-		public void Publish(object state) {
-			var games = new List<Game>();
+            if (!_gameManager.GameClock.Timeout && !_gameManager.GameClock.FinalBuzzer)
+            {
+                // decide which games have updated information
+                foreach (var game in _games)
+                {
+                    var updateGame = BooleanGenerator.NextBoolean();
+                    if (!updateGame) continue;
 
-			_gameManager.Period.ElapsedTime();
+                    // anyone score ?
+                    var scored = BooleanGenerator.NextBoolean();
 
-			if (!_gameManager.GameClock.Timeout) {
-				// decide which games have updated information
-				foreach (var game in _games) {
-					var updateGame = BooleanGenerator.NextBoolean();
-					if (!updateGame) continue;
+                    // which team
+                    var opponentIndex = _random.Next(0, 2);
+                    var opponent = game.Opponents[opponentIndex];
 
-					// anyone score ?
-					var scored = BooleanGenerator.NextBoolean();
+                    // which player	
+                    var numberOfPlayers = opponent.Team.Players.Count;
+                    var playerIndex = _random.Next(0, numberOfPlayers);
 
-					// which team
-					var opponentIndex = _random.Next(0, 2);
-					var opponent = game.Opponents[opponentIndex];
+                    if (scored)
+                    {
+                        // how much did they score
+                        var points = _random.Next(2, 4);
+                        opponent.PointsPerQuarter[_gameManager.GameClock.Quarter - 1] += points;
 
-					// which player	
-					var numberOfPlayers = opponent.Team.Players.Count;
-					var playerIndex = _random.Next(0, numberOfPlayers);
+                        // add player points
+                        opponent.Team.Players[playerIndex].Stats.Points += points;
 
-					if (scored) {
-						// how much did they score
-						var points = _random.Next(2, 4);
-						opponent.PointsPerQuarter[_gameManager.GameClock.Quarter - 1] += points;
+                        // who got the assist
+                        var assisted = BooleanGenerator.NextBoolean();
 
-						// add player points
-						opponent.Team.Players[playerIndex].Stats.Points += points;
+                        if (assisted)
+                        {
+                            var playerAssistIndex = RandomGenerator.NotIn(0, numberOfPlayers, playerIndex);
+                            opponent.Team.Players[playerAssistIndex].Stats.Assists++;
+                        }
+                    }
+                    else
+                    {
+                        // add rebounds
+                        opponent.Team.Players[playerIndex].Stats.Rebounds++;
+                    }
+                }
+            }
 
-						// who got the assist
-						var assisted = BooleanGenerator.NextBoolean();
+            _scores.Games = _games;
+            _scores.GameClock = _gameManager.GameClock;
+            await _tickerHubContext.Clients.All.SendCoreAsync("UpdateScores", [_scores]);
 
-						if (assisted) {
-							var playerAssistIndex = RandomGenerator.NotIn(0, numberOfPlayers, playerIndex);
-							opponent.Team.Players[playerAssistIndex].Stats.Assists++;
-						}
-					}
-					else {
-						// add rebounds
-						opponent.Team.Players[playerIndex].Stats.Rebounds++;
-					}
+            if (_gameManager.GameClock.FinalBuzzer)
+            {
+                _gameManager.GameClock.InProgress = false;
+                _cts.Cancel();
+                _timer?.Dispose();
+            }
+        }
 
-					games.Add(game);
-				}
-			}
+        public class RandomGenerator
+        {
+            private static readonly Random _random = new();
 
-			_scores.Games = games;
-			_scores.GameClock = _gameManager.GameClock;
+            public static int NotIn(int min, int max, int not)
+            {
+                int number = int.MinValue;
 
-			UpdateScores(_scores);
+                for (int i = 0; i < 10000; i++)
+                {
+                    number = _random.Next(min, max);
+                    if (number != not) break;
+                }
 
-			if (!_gameManager.GameClock.FinalBuzzer) {
-				_timer.Change(_gameManager.GameClock.TickerInterval, System.Threading.Timeout.Infinite);
-			}
-			else {
-				_gameManager.GameClock.InProgress = false;
-			}
-		}
+                return number;
+            }
+        }
 
-		public void UpdateScores(Scores _scores) {
-			_clients.All.updateScores(_scores);
-		}
+        public class BooleanGenerator
+        {
+            private static readonly Random _random = new();
 
-		public class RandomGenerator {
-			private static Random _random = new Random();
-
-			public static int NotIn(int min, int max, int not) {
-				int number = int.MinValue;
-
-				for (int i = 0; i < 10000; i++) {
-					number = _random.Next(min, max);
-					if (number != not) break;
-				}
-
-				return number;
-			}
-		}
-
-		public class BooleanGenerator {
-			private static Random _random = new Random();
-
-			public static bool NextBoolean() {
-				return Convert.ToBoolean(_random.Next(0, 2));
-			}
-		}
-	}
+            public static bool NextBoolean()
+            {
+                return Convert.ToBoolean(_random.Next(0, 2));
+            }
+        }
+    }
 }

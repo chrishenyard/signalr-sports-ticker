@@ -1,130 +1,176 @@
-﻿using System.Configuration;
+﻿using SportsTicker.Settings;
 using System.Diagnostics;
 
-namespace SportsTicker.Services {
+namespace SportsTicker.Services
+{
 
-	public class Watch {
-		private Stopwatch sw;
-		private long? elapsedSeconds;
+    public class Watch
+    {
+        private readonly Stopwatch sw;
+        private long? elapsedSeconds;
 
-		public Watch() {
-			sw = new Stopwatch();
-		}
+        public Watch()
+        {
+            sw = new Stopwatch();
+        }
 
-		public Watch(long elapsedSeconds) : this() {
-			this.elapsedSeconds = elapsedSeconds;
-		}
+        public Watch(long elapsedSeconds) : this()
+        {
+            this.elapsedSeconds = elapsedSeconds;
+        }
 
-		public long ElapsedSeconds {
-            get { return elapsedSeconds.HasValue ? elapsedSeconds.Value : sw.ElapsedMilliseconds / 1000;  }
-			set { elapsedSeconds = value;  }
-		}
+        public long ElapsedSeconds
+        {
+            get { return elapsedSeconds ?? sw.ElapsedMilliseconds / 1000; }
+            set { elapsedSeconds = value; }
+        }
 
-		public void Start() {
-			sw.Start();
-		}
+        public void Start()
+        {
+            sw.Start();
+        }
 
-		public void Restart() {
-			sw.Restart();
-		}
-	}
+        public void Restart()
+        {
+            sw.Restart();
+        }
+    }
 
-	public class GameClock {
-		public int TickerInterval = 0;
-		public int Quarter = 1;
-		public int QuarterTime = 0;
-		public int QuarterBreakTime = 0;
-		public int HalfBreakTime = 0;
-		public bool Timeout;
-		public bool FinalBuzzer = false;
-		public bool InProgress = false;
-		public Watch Clock;
-	}
+    public class GameClock
+    {
+        public int TickerInterval { get; set; } = 0;
+        public int Quarter { get; set; } = 1;
+        public int QuarterTime { get; set; } = 0;
+        public int QuarterBreakTime { get; set; } = 0;
+        public int HalfBreakTime { get; set; } = 0;
+        public bool Timeout { get; set; }
+        public bool FinalBuzzer { get; set; }
+        public bool InProgress { get; set; }
+        public Watch Clock { get; set; }
 
-	public enum BreakType {
-		None,
-		QuarterBreak,
-		HalfBreak
-	}
+        public int TimeRemaining
+        {
+            get
+            {
+                if (Timeout)
+                {
+                    var breakTime = (PeriodBreakType == BreakType.QuarterBreak) ? QuarterBreakTime : HalfBreakTime;
+                    var elapsed = Clock.ElapsedSeconds;
+                    return (int)(breakTime - elapsed);
+                }
+                else
+                {
+                    var elapsed = Clock.ElapsedSeconds;
+                    return (int)(QuarterTime - elapsed);
+                }
+            }
+        }
 
-	public abstract class Period {
-		public GameManager GameManager;
-		public BreakType BreakType;
+        public BreakType PeriodBreakType { get; set; } = BreakType.None;
+    }
 
-		public abstract void ElapsedTime();
-	}
+    public enum BreakType
+    {
+        None,
+        QuarterBreak,
+        HalfBreak
+    }
 
-	public class Timeout : Period {
-		public Timeout(GameManager gameManager) {
-			GameManager = gameManager;
-			GameManager.GameClock.Timeout = true;
-		}
+    public abstract class Period
+    {
+        public GameManager GameManager { get; set; }
+        public BreakType BreakType { get; set; }
 
-		public override void ElapsedTime() {
-			var elaspedTime = GameManager.GameClock.Clock.ElapsedSeconds;
-			var breakTime = BreakType == BreakType.QuarterBreak ?
-				GameManager.GameClock.QuarterBreakTime :
-				GameManager.GameClock.HalfBreakTime;
-			var gameClock = GameManager.GameClock;
+        public abstract void ElapsedTime();
+    }
 
-			if (elaspedTime > breakTime) {
-				GameManager.Period = new Quarter(GameManager);
-				GameManager.Period.BreakType = BreakType.None;
+    public class Timeout : Period
+    {
+        public Timeout(GameManager gameManager)
+        {
+            GameManager = gameManager;
+            GameManager.GameClock.Timeout = true;
+        }
+
+        public override void ElapsedTime()
+        {
+            var elapsedTime = GameManager.GameClock.Clock.ElapsedSeconds;
+            var breakTime = BreakType == BreakType.QuarterBreak ?
+                GameManager.GameClock.QuarterBreakTime :
+                GameManager.GameClock.HalfBreakTime;
+            var gameClock = GameManager.GameClock;
+
+            if (elapsedTime > breakTime)
+            {
+                GameManager.Period = new Quarter(GameManager);
+                GameManager.Period.BreakType = BreakType.None;
                 gameClock.Clock.Restart();
-			}
-		}
-	}
+            }
+        }
+    }
 
-	public class Quarter : Period {
-		public Quarter(GameManager gameManager) {
-			GameManager = gameManager;
-			GameManager.GameClock.Timeout = false;
-		}
+    public class Quarter : Period
+    {
+        public Quarter(GameManager gameManager)
+        {
+            GameManager = gameManager;
+            GameManager.GameClock.Timeout = false;
+        }
 
-		public override void ElapsedTime() {
-			var elaspedTime = GameManager.GameClock.Clock.ElapsedSeconds;
-			var quarterTime = GameManager.GameClock.QuarterTime;
-			var gameClock = GameManager.GameClock;
+        public override void ElapsedTime()
+        {
+            var elapsedTime = GameManager.GameClock.Clock.ElapsedSeconds;
+            var quarterTime = GameManager.GameClock.QuarterTime;
+            var gameClock = GameManager.GameClock;
 
-			if (elaspedTime >= quarterTime) {
-				if (gameClock.Quarter == 4) {
-					gameClock.FinalBuzzer = true;
-					return;
-				}
+            if (elapsedTime >= quarterTime)
+            {
+                if (gameClock.Quarter == 4)
+                {
+                    gameClock.FinalBuzzer = true;
+                    gameClock.InProgress = false;
+                    return;
+                }
 
-				GameManager.Period = new Timeout(GameManager);
+                GameManager.Period = new Timeout(GameManager);
 
-				if (gameClock.Quarter == 1 || gameClock.Quarter == 3)
-					GameManager.Period.BreakType = BreakType.QuarterBreak;
-				else
-					GameManager.Period.BreakType = BreakType.HalfBreak;
+                if (gameClock.Quarter == 1 || gameClock.Quarter == 3)
+                    GameManager.Period.BreakType = BreakType.QuarterBreak;
+                else
+                    GameManager.Period.BreakType = BreakType.HalfBreak;
 
-				gameClock.Quarter++;
-				gameClock.Clock.Restart();
-			}
-		}
-	}
+                gameClock.Quarter++;
+                gameClock.Clock.Restart();
+            }
+        }
+    }
 
-	public class GameManager {
-		public GameClock GameClock;
-		public Period Period;
+    public interface IGameManager
+    {
+        GameClock GameClock { get; set; }
+        Period Period { get; set; }
+    }
 
-		public GameManager() {
-			GameClock = new GameClock {
-				Quarter = 1,
-				TickerInterval = int.Parse(ConfigurationManager.AppSettings["TickerInterval"]) * 1000,
-				QuarterTime = int.Parse(ConfigurationManager.AppSettings["QuarterTime"]),
-				QuarterBreakTime = int.Parse(ConfigurationManager.AppSettings["QuarterBreakTime"]),
-				HalfBreakTime = int.Parse(ConfigurationManager.AppSettings["HalfBreakTime"]),
-				Clock = new Watch()
-			};
+    public class GameManager : IGameManager
+    {
+        public GameClock GameClock { get; set; }
+        public Period Period { get; set; }
 
-			Period = new Quarter(this);
-		}
+        public GameManager(IGameSettings gameSettings)
+        {
+            GameClock = new GameClock
+            {
+                Quarter = 1,
+                TickerInterval = gameSettings.TickerInterval,
+                QuarterTime = gameSettings.QuarterTime,
+                QuarterBreakTime = gameSettings.QuarterBreakTime,
+                HalfBreakTime = gameSettings.HalfBreakTime,
+                Clock = new Watch()
+            };
 
-		public GameManager(GameClock gameClock) {
-			GameClock = gameClock;
-			Period = new Quarter(this);
-		}
-	}
+            Period = new Quarter(this);
+        }
+
+        private GameManager() { }
+    }
 }
