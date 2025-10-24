@@ -1,6 +1,6 @@
 # signalr-sports-ticker
 <div>
-  <h1>Sample real-time sports ticker using SignalR developed using Visual Studio vNext, AngularJS and JSON</h1>
+  <h1>Sample SignalR ASP.Net Core 10 and React 19.2 real-time sports ticker app</h1>
 </div>
 
 <p>Tested in the latest versions of Chrome and Firefox</p>
@@ -10,6 +10,8 @@
   <ul>
     <li>SignalR</li>
     <li>Asynchronous IO</li>
+    <li>ASP.Net Core 10</li>
+    <li>React 19.2</li>
     <li>JSON</li>
   </ul>
 </div>
