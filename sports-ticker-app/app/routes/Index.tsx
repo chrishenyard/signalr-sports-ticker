@@ -12,6 +12,8 @@ export default function Index() {
   return (
     <div className="py-8">
       <div className="max-w-4xl mx-auto px-4">
+        <p>Environment: {import.meta.env.MODE}</p>
+        <p>SignalR Server: {import.meta.env.VITE_SIGNALR_HUB_URL}</p>
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Sports Ticker App</h1>
           <p className="text-xl text-gray-600 mb-8">
