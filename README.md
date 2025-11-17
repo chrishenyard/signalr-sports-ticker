@@ -16,17 +16,3 @@
   </ul>
 </div>
 
-<div>
-  <h1>AngularJS Concepts</h1>
-  <ul>
-    <li>Scope isolation</li>
-    <li>Directives</li>
-  </ul>
-</div>
-  
-<div>
-  <h1>CSS Concepts</h1>
-  <ul>
-    <li>Responsive design using bootstrap</li>
-  </ul>
-</div>
