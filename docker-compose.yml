@@ -1,11 +1,18 @@
 services:
   sportsticker:
-    image: ${DOCKER_REGISTRY-}sportsticker
+    image: ${DOCKER_REGISTRY-}sportsticker:${VERSION}
     build:
       context: .
       dockerfile: SportsTicker/Dockerfile
+      args:
+        - AUTHORS=${AUTHORS}
+        - VERSION=${VERSION}
+        - TITLE=${TITLE}
+        - DESCRIPTION=${DESCRIPTION}
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - C:/Logs/SportsTicker:/app/logs/sportsticker/
+      - sports_ticker_logs:/app/logs/sportsticker/
+volumes:
+  sports_ticker_logs:

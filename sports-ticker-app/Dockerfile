@@ -1,9 +1,7 @@
 # syntax=docker/dockerfile:1
-ARG NODE_VERSION=24.10.0
-
 ################################################################################
 # Build stage
-FROM node:${NODE_VERSION}-alpine as build
+FROM node:25-alpine@sha256:26ded7f450a0ad37241d2ae97ea521a59cb551a1785c8a950f74b0a291ad3aea AS build
 
 WORKDIR /app
 COPY package*.json ./
@@ -18,7 +16,7 @@ RUN npx react-router build --mode production
 
 ################################################################################
 # Production stage with nginx
-FROM nginx:alpine
+FROM nginx@sha256:4c175d0d849aae0e0eedc64d718ef6323bed2bc68ee673e2d0a1bd5d501d0e5f
 
 COPY --from=build /app/build/client /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
