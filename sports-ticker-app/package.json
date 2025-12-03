@@ -12,18 +12,18 @@
   },
   "dependencies": {
     "@microsoft/signalr": "^9.0.6",
-    "@react-router/node": "^7.9.3",
-    "@react-router/serve": "^7.9.3",
+    "@react-router/node": "^7.10.0",
+    "@react-router/serve": "^7.10.0",
     "isbot": "^5.1.31",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router": "^7.9.3",
+    "react-router": "^7.10.0",
     "react-router-dev": "^1.0.0",
-    "react-router-dom": "^7.9.3"
+    "react-router-dom": "^7.10.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
-    "@react-router/dev": "^7.9.3",
+    "@react-router/dev": "^7.10.0",
     "@tailwindcss/vite": "^4.1.14",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
