@@ -26,8 +26,8 @@ type RouteFiles = {
     id: "root";
     page: "/" | "/ticker/:hubUrl";
   };
-  "routes/Index.tsx": {
-    id: "routes/Index";
+  "routes/home.tsx": {
+    id: "routes/home";
     page: "/";
   };
   "./ticker/Sports-Ticker.tsx": {
@@ -38,6 +38,6 @@ type RouteFiles = {
 
 type RouteModules = {
   "root": typeof import("./app/root.tsx");
-  "routes/Index": typeof import("./app/routes/Index.tsx");
+  "routes/home": typeof import("./app/routes/home.tsx");
   "ticker/Sports-Ticker": typeof import("./app/./ticker/Sports-Ticker.tsx");
 };

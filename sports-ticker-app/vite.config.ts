@@ -1,6 +1,7 @@
 import { reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, loadEnv } from "vite";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -8,16 +9,16 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [tailwindcss(), reactRouter()],
     build: {
-      outDir: "build/client",
+      outDir: "build",
       emptyOutDir: true,
-      sourcemap: mode === "development" ? true : false,
       assetsDir: "assets",
       rollupOptions: {
         output: {
           manualChunks: undefined,
-          entryFileNames: `assets/[name].js`,
+          entryFileNames: `assets/index.js`,
           chunkFileNames: `assets/[name]-chunk.js`,
           assetFileNames: `assets/[name].[ext]`,
+          format: "es",
         },
       },
     },
