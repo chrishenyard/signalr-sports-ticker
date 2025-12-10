@@ -11,7 +11,8 @@ namespace SportsTicker
         {
             builder.Services.AddOptions<GameSettings>()
                 .Bind(builder.Configuration.GetSection(GameSettings.Section))
-                .ValidateDataAnnotations();
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
         }
     }
 }
