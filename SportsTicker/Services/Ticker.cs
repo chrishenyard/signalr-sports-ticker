@@ -24,7 +24,7 @@ namespace SportsTicker.Services
         private readonly IHubContext<SportsTickerHub> _tickerHubContext = tickerHubContext;
         private readonly IGameManager _gameManager = gameManager;
         private readonly Scores _scores = new();
-        private readonly PeriodicTimer _timer;
+        private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(5));
         private List<Game> _games = [];
         private static readonly Random _random = new();
         private CancellationTokenSource _cts;
