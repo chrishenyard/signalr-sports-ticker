@@ -1,4 +1,5 @@
-﻿using SportsTicker.Settings;
+﻿using Microsoft.Extensions.Options;
+using SportsTicker.Settings;
 using System.Diagnostics;
 
 namespace SportsTicker.Services
@@ -155,6 +156,23 @@ namespace SportsTicker.Services
     {
         public GameClock GameClock { get; set; }
         public Period Period { get; set; }
+
+        public GameManager(IOptions<GameSettings> gameSettings)
+        {
+            var settings = gameSettings.Value;
+
+            GameClock = new GameClock
+            {
+                Quarter = 1,
+                TickerInterval = settings.TickerInterval,
+                QuarterTime = settings.QuarterTime,
+                QuarterBreakTime = settings.QuarterBreakTime,
+                HalfBreakTime = settings.HalfBreakTime,
+                Clock = new Watch()
+            };
+
+            Period = new Quarter(this);
+        }
 
         public GameManager(IGameSettings gameSettings)
         {

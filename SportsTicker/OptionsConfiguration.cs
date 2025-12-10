@@ -9,13 +9,9 @@ namespace SportsTicker
     {
         static public void AddOptions(this WebApplicationBuilder builder)
         {
-            builder.Services.AddSingleton<IGameSettings>(serviceProvider =>
-            {
-                var options = builder.Configuration
-                    .GetSection(GameSettings.Section)
-                    .Get<GameSettings>();
-                return options!;
-            });
+            builder.Services.AddOptions<GameSettings>()
+                .Bind(builder.Configuration.GetSection(GameSettings.Section))
+                .ValidateDataAnnotations();
         }
     }
 }
