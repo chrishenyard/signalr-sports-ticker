@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,6 +10,22 @@ using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.UseKestrel(builder =>
+{
+    builder.AddServerHeader = false;
+});
+
+builder.Host
+    .UseDefaultServiceProvider((context, options) =>
+    {
+        options.ValidateOnBuild = true;
+    })
+    .UseSerilog((context, configuration) =>
+    {
+        configuration
+            .ReadFrom.Configuration(context.Configuration);
+    });
+
 var configuration = builder.Configuration
     .SetBasePath(builder.Environment.ContentRootPath)
     .AddJsonFile($"appsettings.json", optional: false, reloadOnChange: true)
@@ -16,11 +33,6 @@ var configuration = builder.Configuration
     .AddEnvironmentVariables()
     .Build();
 
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(configuration)
-    .CreateLogger();
-
-builder.Services.AddSerilog();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddControllers();
@@ -46,6 +58,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseSerilogRequestLogging();
 app.UseExceptionHandler();
 app.UseStaticFiles();
 app.UseRouting();
